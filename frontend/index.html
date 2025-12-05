@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mystic Paws</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Quicksand:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="app" class="app-shell">
+
+    <!-- HEADER -->
+    <header class="mp-header">
+      <div class="mp-header-left">
+        <div id="headerAvatar" class="mp-avatar-wrapper">
+          <img id="headerAvatarImg" class="mp-avatar-img hidden" alt="avatar">
+          <div id="headerAvatarInitial" class="mp-avatar-initial hidden">U</div>
+          <div class="mp-avatar-overlay">EDIT</div>
+        </div>
+
+        <div>
+          <h1 class="mp-title">Mystic Paws</h1>
+          <p class="mp-tagline">Share spells, charms and cozy pet moments</p>
+        </div>
+      </div>
+
+      <div class="mp-header-right">
+        <div id="statusLoggedOut" class="mp-status">
+          <span class="mp-status-text">You are not logged in</span>
+        </div>
+
+        <div id="statusLoggedIn" class="mp-status hidden">
+          <span class="mp-status-text">
+            Logged in as <span id="currentUserName"></span>
+          </span>
+          <button id="logoutButton" class="btn btn-outline">Log out</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="mp-main">
+
+      <!-- LEFT COLUMN -->
+      <section class="mp-column mp-column-left">
+
+        <!-- PROFILE CARD -->
+        <section class="mystic-card profile-card hidden" id="profileCard">
+          <h2>Your familiar</h2>
+
+          <div class="profile-box">
+            <div id="profileAvatar" class="profile-avatar">
+              <div id="profileAvatarInitial" class="profile-avatar-initial">U</div>
+              <input id="profileAvatarFile" type="file" accept="image/*" class="visually-hidden">
+            </div>
+
+            <div class="profile-text">
+              <p id="profileUsername" class="profile-name">You</p>
+              <p id="profileNote" class="profile-note">Add a short bio so other familiars know you.</p>
+
+              <div class="profile-stats-row">
+                <div class="profile-stat">
+                  <span id="profileFollowersCount">0</span>
+                  <span class="profile-stat-label">Followers</span>
+                </div>
+                <div class="profile-stat">
+                  <span id="profileFollowingCount">0</span>
+                  <span class="profile-stat-label">Following</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form id="profileForm" class="mp-form">
+            <label>Bio
+              <textarea id="profileBio" rows="3" placeholder="Write a short bio"></textarea>
+            </label>
+            <button type="submit" class="btn btn-full">Save profile</button>
+          </form>
+        </section>
+
+        <!-- CREATE POST -->
+        <section class="mystic-card" id="createPanel">
+          <h2>Cast a new post</h2>
+          <p class="mp-hint">Drop an image of your familiar or click the circle to upload.</p>
+
+          <div id="postImageDrop" class="post-drop-circle">
+            <span class="post-drop-text">Drop image here or tap to choose</span>
+          </div>
+          <input id="postImageFile" type="file" accept="image/*" class="hidden">
+
+          <form id="postForm" class="mp-form">
+            <label>Caption (optional)
+              <textarea id="postText" rows="3" maxlength="280" placeholder="Add a short spell or caption."></textarea>
+            </label>
+            <div class="mp-form-actions">
+              <button type="submit" class="btn">Post to Mystic Paws</button>
+              <span id="postCharCount" class="char-count">0 / 280</span>
+            </div>
+          </form>
+
+          <div id="postMessage" class="mp-message"></div>
+        </section>
+
+        <!-- SIMPLE FILE UPLOAD DEMO (FOR FILE UPLOAD ENDPOINT) -->
+        <section class="mystic-card" id="uploadDemoCard">
+          <h2>Image upload demo</h2>
+          <p class="mp-hint">Upload a single image using the upload web service.</p>
+
+          <div class="mp-form-inline">
+            <input type="file" id="FileInput" accept="image/*">
+            <button type="button" class="btn btn-small" onclick="uploadFile()">Upload</button>
+          </div>
+
+          <div id="ServerResponse" class="mp-message"></div>
+          <div id="UploadedImage" class="upload-preview"></div>
+        </section>
+
+      </section>
+
+      <!-- CENTER COLUMN -->
+      <section class="mp-column mp-column-center">
+        <section class="mystic-card" id="feedPanel">
+          <div class="card-header-with-action">
+            <h2>Your familiar feed</h2>
+
+            <div class="feed-toggle-group">
+              <button id="showFollowingFeed" class="btn-toggle active">Following</button>
+              <button id="showExploreFeed" class="btn-toggle">Explore</button>
+              <button id="refreshFeedButton" class="btn btn-small">Refresh</button>
+            </div>
+          </div>
+
+          <!-- POST SEARCH ABOVE FEED -->
+          <form id="postSearchForm" class="mp-form-inline feed-search">
+            <input type="text" id="postSearchQuery" placeholder="Search posts">
+            <button type="submit" class="btn btn-small">Search</button>
+          </form>
+          <div id="feedSearchMessage" class="mp-message"></div>
+
+          <div id="feedEmpty" class="mp-hint hidden">Follow some mystic paws to see their posts here.</div>
+
+          <div class="feed-scroll">
+            <ul id="feedList" class="mp-feed-list"></ul>
+          </div>
+        </section>
+      </section>
+
+      <!-- RIGHT COLUMN: OTHER PAWS + ORACLE -->
+      <section class="mp-column mp-column-right">
+
+        <!-- OTHER PAWS -->
+        <section class="mystic-card" id="userSearchPanel">
+          <div class="card-header-with-action">
+            <h2>Other paws</h2>
+            <button id="refreshUsersButton" class="btn btn-small">Refresh</button>
+          </div>
+          <p class="mp-hint">Browse other familiars in the coven.</p>
+
+          <form id="userSearchForm" class="mp-form-inline">
+            <input type="text" id="userSearchQuery" placeholder="Search usernames">
+            <button type="submit" class="btn btn-small">Search</button>
+          </form>
+
+          <ul id="userSearchResults" class="mp-list mp-user-list"></ul>
+          <div id="userHoverContainer" class="user-hover-container"></div>
+        </section>
+
+        <!-- MYSTIC ORACLE (THIRD-PARTY DATA) -->
+        <section class="mystic-card" id="oracleCard">
+          <div class="card-header-with-action">
+            <h2>Mystic oracle</h2>
+            <button id="oracleRefreshButton" class="btn btn-small">Refresh</button>
+          </div>
+
+          <p class="mp-hint">Cats Facts and Images</p>
+
+          <div class="mystic-oracle-body">
+            <div class="mystic-oracle-image-wrapper">
+              <img id="oracleImage" class="mystic-oracle-image" alt="Oracle animal">
+            </div>
+
+            <p id="oracleFact" class="mystic-oracle-fact"></p>
+            <p id="oracleStatus" class="mp-message"></p>
+          </div>
+        </section>
+
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mp-footer">
+      <span>Mystic Paws</span>
+      <span class="mp-footer-dot">•</span>
+      <span>zibawaa</span>
+    </footer>
+
+    <div id="globalMessage" class="mp-global-message hidden"></div>
+
+  </div>
+
+  <!-- AUTH OVERLAY -->
+  <div id="authOverlay" class="auth-overlay visible">
+    <div class="auth-backdrop"></div>
+
+    <div class="auth-dialog">
+      <div class="auth-dialog-inner">
+
+        <div class="auth-hero">
+          <div class="auth-hero-circle">
+            <img src="images/mystic-cat.jpg" class="auth-hero-image" alt="Mystic cat">
+          </div>
+        </div>
+
+        <div class="auth-forms">
+
+          <section class="auth-section" id="loginSection">
+            <h2>Log in</h2>
+            <form id="loginForm" class="mp-form">
+              <label>Username
+                <input id="loginUsername" type="text">
+              </label>
+              <label>Password
+                <input id="loginPassword" type="password">
+              </label>
+              <button type="submit" class="btn btn-full">Enter the circle</button>
+              <div id="loginMessage" class="mp-message"></div>
+            </form>
+
+            <p class="auth-switch">
+              New to Mystic Paws
+              <button type="button" id="showRegister" class="link-button">Create an account</button>
+            </p>
+          </section>
+
+          <section class="auth-section hidden" id="registerSection">
+            <h2>Create account</h2>
+            <form id="registerForm" class="mp-form">
+              <label>Username
+                <input id="registerUsername" type="text">
+              </label>
+              <label>Password
+                <input id="registerPassword" type="password">
+              </label>
+              <button type="submit" class="btn btn-secondary btn-full">Join Mystic Paws</button>
+              <div id="registerMessage" class="mp-message"></div>
+            </form>
+
+            <p class="auth-switch">
+              Already have an account
+              <button type="button" id="showLogin" class="link-button">Log in</button>
+            </p>
+          </section>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
